@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Kasir Warung</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --cream:      #FAF6F0;
+      --warm-50:    #FDF8F2;
+      --warm-100:   #F5EAD8;
+      --warm-200:   #E8D5B7;
+      --brown-600:  #7C5230;
+      --brown-800:  #4A2E12;
+      --amber:      #E07B2A;
+      --green:      #2E7D5A;
+      --green-lt:   #E6F4EE;
+      --red:        #C0392B;
+      --red-lt:     #FDECEA;
+      --text-main:  #2C1A0E;
+      --text-muted: #8A7060;
+      --border:     #E0D0BC;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: var(--cream);
+      color: var(--text-main);
+    }
+
+    /* ── Left panel (decorative) ── */
+    .left-panel {
+      flex: 0 0 420px;
+      background: var(--brown-800);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px 44px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative circles */
+    .left-panel::before,
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      opacity: .06;
+      background: #fff;
+    }
+    .left-panel::before {
+      width: 360px; height: 360px;
+      bottom: -80px; right: -100px;
+    }
+    .left-panel::after {
+      width: 200px; height: 200px;
+      top: -50px; left: -60px;
+    }
+
+    .left-brand {
+      position: relative;
+      z-index: 1;
+    }
+    .left-brand .brand-icon {
+      width: 52px; height: 52px;
+      background: var(--amber);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(224,123,42,.4);
+    }
+    .left-brand h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .left-brand p {
+      color: var(--warm-200);
+      font-size: .9rem;
+      line-height: 1.6;
+      opacity: .85;
+    }
+
+    .left-features {
+      position: relative;
+      z-index: 1;
+    }
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .feature-item:last-child { margin-bottom: 0; }
+    .feature-icon {
+      width: 34px; height: 34px;
+      background: rgba(255,255,255,.1);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .95rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .feature-text strong {
+      display: block;
+      color: #fff;
+      font-size: .88rem;
+      margin-bottom: 2px;
+    }
+    .feature-text span {
+      color: var(--warm-200);
+      font-size: .78rem;
+      opacity: .75;
+    }
+
+    .left-footer {
+      position: relative;
+      z-index: 1;
+    }
+    .left-footer small {
+      color: var(--warm-200);
+      font-size: .72rem;
+      opacity: .45;
+    }
+
+    /* ── Right panel (form) ── */
+    .right-panel {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-box h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--brown-800);
+      margin-bottom: 6px;
+    }
+    .login-box .subtitle {
+      color: var(--text-muted);
+      font-size: .88rem;
+      margin-bottom: 32px;
+    }
+
+    /* Flash message */
+    .flash-msg {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: .85rem;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    .flash-warning { background: #FFF8E6; color: #92610A; border: 1px solid #F5D87E; }
+    .flash-error   { background: var(--red-lt); color: var(--red); border: 1px solid #F5C6C2; }
+
+    /* Form elements */
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block;
+      font-weight: 600;
+      font-size: .83rem;
+      color: var(--brown-800);
+      margin-bottom: 7px;
+    }
+    .input-wrap {
+      position: relative;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+    .form-input {
+      width: 100%;
+      padding: 11px 14px 11px 40px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: .92rem;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--warm-50);
+      color: var(--text-main);
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--amber);
+      box-shadow: 0 0 0 3px rgba(224,123,42,.14);
+      background: #fff;
+    }
+    .form-input.input-error {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(192,57,43,.1);
+    }
+
+    /* Password toggle */
+    .toggle-pw {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 4px;
+      border-radius: 4px;
+      font-size: .95rem;
+      transition: color .15s;
+    }
+    .toggle-pw:hover { color: var(--amber); }
+
+    /* Submit button */
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: var(--amber);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-login:hover {
+      background: var(--brown-600);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(224,123,42,.3);
+    }
+    .btn-login:active { transform: translateY(0); }
+
+    /* Hint box */
+    .hint-box {
+      margin-top: 24px;
+      padding: 14px 16px;
+      background: var(--warm-100);
+      border-radius: 10px;
+      border-left: 3px solid var(--amber);
+    }
+    .hint-box p {
+      font-size: .78rem;
+      color: var(--brown-600);
+      margin: 0;
+      line-height: 1.6;
+    }
+    .hint-box strong { color: var(--brown-800); }
+
+    /* Responsive: hide left panel on small screens */
+    @media (max-width: 720px) {
+      .left-panel { display: none; }
+      .right-panel { padding: 32px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Left decorative panel -->
+  <div class="left-panel">
+    <div class="left-brand">
+      <div class="brand-icon">🍽️</div>
+      <h1>Kasir<br>Warung</h1>
+      <p>Sistem pencatatan keuangan harian warung makan yang sederhana, cepat, dan aman.</p>
+    </div>
+
+
+  </div>
+
+  <!-- Right form panel -->
+  <div class="right-panel">
+    <div class="login-box">
+
+      <h2>Selamat Datang</h2>
+      <p class="subtitle">Masuk ke akun Anda untuk melanjutkan</p>
+
+      <!-- Flash warning (redirect dari halaman protected) -->
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in msgs %}
+          <div class="flash-msg flash-{{ cat }}">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            {{ msg }}
+          </div>
+        {% endfor %}
+      {% endwith %}
+
+      <!-- Error login -->
+      {% if error %}
+      <div class="flash-msg flash-error" id="loginError">
+        <i class="bi bi-x-circle-fill"></i>
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('login') }}" autocomplete="off">
+        <input type="hidden" name="next" value="{{ next }}">
+
+        <!-- Username -->
+        <div class="form-group">
+          <label class="form-label" for="username">Username</label>
+          <div class="input-wrap">
+            <i class="bi bi-person input-icon"></i>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              class="form-input {% if error %}input-error{% endif %}"
+              placeholder="Masukkan username"
+              value="{{ request.form.get('username', '') }}"
+              autocomplete="username"
+              required
+              autofocus
+            >
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrap">
+            <i class="bi bi-lock input-icon"></i>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input {% if error %}input-error{% endif %}"
+              placeholder="Masukkan password"
+              autocomplete="current-password"
+              required
+            >
+            <button type="button" class="toggle-pw" id="togglePw" title="Tampilkan password">
+              <i class="bi bi-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login">
+          <i class="bi bi-box-arrow-in-right"></i>
+          Masuk
+        </button>
+      </form>
+
+      <!-- Default credential hint -->
+      <div class="hint-box">
+        <p>
+          <strong>Akun default:</strong><br>
+          Username: <strong>admin</strong> &nbsp;·&nbsp; Password: <strong>admin123</strong><br>
+          <span style="opacity:.7;">Ganti password setelah login pertama.</span>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Toggle show/hide password
+    const pwInput  = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePw');
+    const eyeIcon  = document.getElementById('eyeIcon');
+
+    toggleBtn.addEventListener('click', () => {
+      const show = pwInput.type === 'password';
+      pwInput.type      = show ? 'text' : 'password';
+      eyeIcon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+    });
+
+    // Auto-dismiss error after 5s with fade
+    const errEl = document.getElementById('loginError');
+    if (errEl) {
+      setTimeout(() => {
+        errEl.style.transition = 'opacity .5s';
+        errEl.style.opacity = '0';
+        setTimeout(() => errEl.remove(), 500);
+      }, 5000);
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,528 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Kasir Warung{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  /* ── Filter Pills ── */
+  .filter-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--warm-50);
+    color: var(--text-muted);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+  }
+
+  .filter-pill:hover {
+    border-color: var(--amber);
+    color: var(--amber);
+    background: #FFF3E8;
+  }
+
+  .filter-pill.active {
+    background: var(--amber);
+    border-color: var(--amber);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(224, 123, 42, .3);
+  }
+
+  .filter-pill[data-filter="Harian Penjualan"].active {
+    background: #2E7D5A;
+    border-color: #2E7D5A;
+    box-shadow: 0 3px 10px rgba(46, 125, 90, .3);
+  }
+
+  .filter-pill[data-filter="Harian"].active {
+    background: #2E7D5A;
+    border-color: #2E7D5A;
+    box-shadow: 0 3px 10px rgba(46, 125, 90, .3);
+  }
+
+  .filter-pill[data-filter="Stok Bahan"].active {
+    background: #1565C0;
+    border-color: #1565C0;
+    box-shadow: 0 3px 10px rgba(21, 101, 192, .3);
+  }
+
+  .filter-pill[data-filter="Operasional"].active {
+    background: #6A1F73;
+    border-color: #6A1F73;
+    box-shadow: 0 3px 10px rgba(106, 31, 115, .3);
+  }
+
+  /* Row filter animation */
+  #riwayatBody tr {
+    transition: opacity .18s, transform .18s;
+  }
+
+  #riwayatBody tr.hide-row {
+    display: none;
+  }
+
+  /* Sort icon states */
+  #thKategori:hover {
+    color: var(--amber);
+  }
+
+  #thKategori:hover #sortKategoriIcon {
+    opacity: 1 !important;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header d-flex align-items-start justify-content-between">
+  <div>
+    <h2>Dashboard Keuangan</h2>
+    <p><i class="bi bi-calendar3 me-1"></i>{{ today }}</p>
+  </div>
+  <a href="{{ url_for('input_transaksi') }}"
+    class="btn-primary-custom text-decoration-none d-flex align-items-center gap-2">
+    <i class="bi bi-plus-lg"></i> Catat Transaksi
+  </a>
+</div>
+
+<!-- Stat Cards Row -->
+<div class="row g-3 mb-4">
+  <div class="col-lg-3 col-sm-6">
+    <div class="card stat-card h-100">
+      <div class="stat-icon icon-masuk"><i class="bi bi-arrow-down-circle-fill"></i></div>
+      <div class="stat-value text-success">
+        Rp {{ "{:,.0f}".format(total_masuk_hari).replace(",", ".") }}
+      </div>
+      <div class="stat-label">Pendapatan Hari Ini</div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-sm-6">
+    <div class="card stat-card h-100">
+      <div class="stat-icon icon-keluar"><i class="bi bi-arrow-up-circle-fill"></i></div>
+      <div class="stat-value text-danger">
+        Rp {{ "{:,.0f}".format(total_keluar_hari).replace(",", ".") }}
+      </div>
+      <div class="stat-label">Pengeluaran Hari Ini</div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-sm-6">
+    <div class="card stat-card h-100">
+      <div class="stat-icon icon-saldo"><i class="bi bi-wallet2"></i></div>
+      <div class="stat-value" style="color: var(--amber)">
+        Rp {{ "{:,.0f}".format(saldo_hari).replace(",", ".") }}
+      </div>
+      <div class="stat-label">Saldo Bersih Hari Ini</div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-sm-6">
+    <div class="card stat-card h-100">
+      <div class="stat-icon icon-total"><i class="bi bi-bank2"></i></div>
+      <div class="stat-value" style="color: var(--brown-600)">
+        Rp {{ "{:,.0f}".format(saldo_total).replace(",", ".") }}
+      </div>
+      <div class="stat-label">Total Saldo Terkini</div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-3 mb-4">
+
+  <!-- Donut Chart -->
+  <div class="col-lg-4">
+    <div class="card h-100 p-4">
+      <div class="card-title-sm mb-1">Kondisi Keuangan</div>
+      <p class="text-muted mb-3" style="font-size:.8rem">Hari Ini</p>
+
+      <div style="position:relative; height:220px; display:flex; align-items:center; justify-content:center;">
+        <canvas id="donutChart"></canvas>
+        <div id="donutCenter" style="position:absolute; text-align:center; pointer-events:none;">
+          <div style="font-family:'Fraunces',serif; font-size:1.1rem; font-weight:600; color:var(--brown-800);"
+            id="donutCenterVal">
+            Rp {{ "{:,.0f}".format(saldo_hari).replace(",", ".") }}
+          </div>
+          <div style="font-size:.7rem; color:var(--text-muted);">Saldo Bersih</div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+      <div class="d-flex justify-content-around">
+        <div class="text-center">
+          <div
+            style="width:10px;height:10px;border-radius:50%;background:#2E7D5A;display:inline-block;margin-right:5px;">
+          </div>
+          <span style="font-size:.78rem; color:var(--text-muted);">Masuk</span>
+          <div style="font-weight:600; font-size:.85rem; color:var(--green)">Rp {{
+            "{:,.0f}".format(total_masuk_hari).replace(",", ".") }}</div>
+        </div>
+        <div style="width:1px; background:var(--border);"></div>
+        <div class="text-center">
+          <div
+            style="width:10px;height:10px;border-radius:50%;background:#C0392B;display:inline-block;margin-right:5px;">
+          </div>
+          <span style="font-size:.78rem; color:var(--text-muted);">Keluar</span>
+          <div style="font-weight:600; font-size:.85rem; color:var(--red)">Rp {{
+            "{:,.0f}".format(total_keluar_hari).replace(",", ".") }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bar Chart -->
+  <div class="col-lg-8">
+    <div class="card h-100 p-4">
+      <div class="card-title-sm mb-1">Tren Keuangan</div>
+      <p class="text-muted mb-3" style="font-size:.8rem">Perbandingan 7 Hari Terakhir</p>
+      <div style="height:240px; position:relative;">
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Recent Transactions Table -->
+<div class="card">
+
+  <!-- Card Header -->
+  <div class="p-4" style="border-bottom:1px solid var(--border)">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div>
+        <div class="card-title-sm">Riwayat Transaksi</div>
+        <p class="mb-0 text-muted" style="font-size:.8rem">
+          10 transaksi terbaru &nbsp;&middot;&nbsp;
+          <span id="filterCount" style="color:var(--amber); font-weight:600;"></span>
+        </p>
+      </div>
+      <a href="{{ url_for('input_transaksi') }}"
+        style="font-size:.82rem; color:var(--amber); font-weight:600; text-decoration:none;">
+        + Tambah Baru
+      </a>
+    </div>
+
+    <!-- Filter Pills -->
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <span
+        style="font-size:.75rem; font-weight:600; color:var(--text-muted); letter-spacing:.05em; text-transform:uppercase;">
+        <i class="bi bi-funnel me-1"></i>Filter:
+      </span>
+      <button class="filter-pill active" data-filter="Semua">
+        <i class="bi bi-grid-3x3-gap me-1"></i>Semua
+      </button>
+      <button class="filter-pill" data-filter="Harian Penjualan">
+        Harian Penjualan
+      </button>
+      <button class="filter-pill" data-filter="Harian">
+        Harian (Keluar)
+      </button>
+      <button class="filter-pill" data-filter="Stok Bahan">
+        Stok Bahan
+      </button>
+      <button class="filter-pill" data-filter="Operasional">
+        Operasional
+      </button>
+      <div style="width:1px; height:20px; background:var(--border); margin:0 4px;"></div>
+      <button class="filter-pill" id="sortToggle" data-sort="none" title="Sort by nominal">
+        <i class="bi bi-sort-numeric-down me-1"></i>Sort Nominal
+      </button>
+    </div>
+  </div>
+
+  <div style="overflow-x:auto;">
+    <table class="table-custom" id="riwayatTable">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Tipe</th>
+          <th id="thKategori" style="cursor:pointer; user-select:none;" title="Klik untuk sort berdasarkan kategori">
+            Kategori <i class="bi bi-chevron-expand ms-1" id="sortKategoriIcon"
+              style="font-size:.7rem; opacity:.5;"></i>
+          </th>
+          <th>Nama / Keterangan</th>
+          <th class="text-end">Nominal</th>
+          <th class="text-center">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="riwayatBody">
+        {% if riwayat %}
+        {% for t in riwayat %}
+        <tr data-kategori="{{ t.kategori }}" data-nominal="{{ t.nominal }}">
+          <td style="color:var(--text-muted); white-space:nowrap;">
+            {{ t.tanggal }}
+          </td>
+          <td>
+            <span class="badge rounded-pill px-3 py-1
+                {% if t.tipe == 'Masuk' %}badge-masuk{% else %}badge-keluar{% endif %}">
+              {% if t.tipe == 'Masuk' %}
+              <i class="bi bi-arrow-down me-1"></i>
+              {% else %}
+              <i class="bi bi-arrow-up me-1"></i>
+              {% endif %}
+              {{ t.tipe }}
+            </span>
+          </td>
+          <td>
+            <span class="badge-kategori">{{ t.kategori }}</span>
+          </td>
+          <td style="font-weight:500;">{{ t.nama_barang }}</td>
+          <td class="text-end" style="font-weight:600; font-family:'Fraunces',serif;
+              color: {% if t.tipe == 'Masuk' %}var(--green){% else %}var(--red){% endif %}">
+            {% if t.tipe == 'Masuk' %}+{% else %}−{% endif %}
+            Rp {{ "{:,.0f}".format(t.nominal).replace(",", ".") }}
+          </td>
+          <td class="text-center">
+            <form action="{{ url_for('hapus_transaksi', id=t.id) }}" method="post"
+              onsubmit="return confirm('Hapus transaksi ini?')">
+              <button type="submit"
+                style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .15s;"
+                onmouseover="this.style.color='var(--red)';this.style.background='var(--red-lt)'"
+                onmouseout="this.style.color='var(--text-muted)';this.style.background='none'">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr id="emptyRow">
+          <td colspan="6" class="text-center py-5" style="color:var(--text-muted);">
+            <i class="bi bi-inbox" style="font-size:2rem; display:block; margin-bottom:8px;"></i>
+            Belum ada transaksi. <a href="{{ url_for('input_transaksi') }}" style="color:var(--amber)">Catat sekarang
+              →</a>
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+
+    <!-- Empty filter state -->
+    <div id="emptyFilter" style="display:none; text-align:center; padding:40px 20px; color:var(--text-muted);">
+      <i class="bi bi-search" style="font-size:2rem; display:block; margin-bottom:8px; opacity:.4;"></i>
+      <div style="font-weight:500;">Tidak ada transaksi untuk kategori ini</div>
+      <button onclick="setFilter('Semua')"
+        style="margin-top:10px; background:none; border:none; color:var(--amber); font-weight:600; cursor:pointer; font-size:.85rem;">
+        Tampilkan semua &rarr;
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script>
+  /* ── Donut Chart ── */
+  const masukHari = {{ total_masuk_hari }};
+  const keluarHari = {{ total_keluar_hari }};
+
+  const donutCtx = document.getElementById('donutChart').getContext('2d');
+  new Chart(donutCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Pemasukan', 'Pengeluaran'],
+      datasets: [{
+        data: masukHari === 0 && keluarHari === 0 ? [1, 0] : [masukHari, keluarHari],
+        backgroundColor: ['#2E7D5A', '#C0392B'],
+        hoverBackgroundColor: ['#236247', '#A93226'],
+        borderWidth: 0,
+        borderRadius: 4,
+        spacing: 2,
+      }]
+    },
+    options: {
+      cutout: '72%',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' Rp ' + ctx.raw.toLocaleString('id-ID')
+          }
+        }
+      }
+    }
+  });
+
+  /* ── Bar Chart ── */
+  const barCtx = document.getElementById('barChart').getContext('2d');
+  new Chart(barCtx, {
+    type: 'bar',
+    data: {
+      labels: {{ chart_labels | tojson }},
+    datasets: [
+    {
+      label: 'Pemasukan',
+      data: {{ bar_masuk | tojson }},
+    backgroundColor: 'rgba(46,125,90,.75)',
+    hoverBackgroundColor: 'rgba(46,125,90,1)',
+    borderRadius: 6,
+    borderSkipped: false,
+        },
+    {
+      label: 'Pengeluaran',
+      data: {{ bar_keluar | tojson }},
+    backgroundColor: 'rgba(192,57,43,.65)',
+    hoverBackgroundColor: 'rgba(192,57,43,1)',
+    borderRadius: 6,
+    borderSkipped: false,
+        }
+  ]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        position: 'top',
+        align: 'end',
+        labels: {
+          boxWidth: 10,
+          boxHeight: 10,
+          borderRadius: 5,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          font: { family: 'DM Sans', size: 12 },
+          color: '#8A7060'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx => ' Rp ' + ctx.raw.toLocaleString('id-ID')
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { font: { family: 'DM Sans', size: 11 }, color: '#8A7060' }
+      },
+      y: {
+        grid: { color: '#F0E8DC', lineWidth: 1 },
+        border: { dash: [4, 4], display: false },
+        ticks: {
+          font: { family: 'DM Sans', size: 11 },
+          color: '#8A7060',
+          callback: val => 'Rp ' + (val / 1000).toFixed(0) + 'k'
+        }
+      }
+    }
+  }
+  });
+
+
+  /* ── Filter & Sort: Riwayat Transaksi ── */
+  let currentFilter = 'Semua';
+  let kategoriSortDir = null; // null | 'asc' | 'desc'
+
+  const tbody = document.getElementById('riwayatBody');
+  const emptyFilter = document.getElementById('emptyFilter');
+  const filterCount = document.getElementById('filterCount');
+  const sortKatIcon = document.getElementById('sortKategoriIcon');
+  const thKategori = document.getElementById('thKategori');
+
+  function getAllRows() {
+    return Array.from(tbody.querySelectorAll('tr[data-kategori]'));
+  }
+
+  function updateFilterCount() {
+    const visible = getAllRows().filter(r => !r.classList.contains('hide-row'));
+    const total = getAllRows().length;
+    if (currentFilter === 'Semua') {
+      filterCount.textContent = '';
+    } else {
+      filterCount.textContent = visible.length + ' dari ' + total + ' ditampilkan';
+    }
+    emptyFilter.style.display = visible.length === 0 ? 'block' : 'none';
+  }
+
+  function applyFilter(filter) {
+    getAllRows().forEach(row => {
+      const kat = row.dataset.kategori;
+      if (filter === 'Semua' || kat === filter) {
+        row.classList.remove('hide-row');
+      } else {
+        row.classList.add('hide-row');
+      }
+    });
+    updateFilterCount();
+  }
+
+  function setFilter(filter) {
+    currentFilter = filter;
+    // Update pill states
+    document.querySelectorAll('.filter-pill[data-filter]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.filter === filter);
+    });
+    applyFilter(filter);
+  }
+
+  // Pill click handlers
+  document.querySelectorAll('.filter-pill[data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => setFilter(btn.dataset.filter));
+  });
+
+  // Sort by kategori (click on th)
+  const katOrder = { 'Harian Penjualan': 1, 'Harian': 2, 'Stok Bahan': 3, 'Operasional': 4 };
+
+  function sortByKategori(dir) {
+    const rows = getAllRows();
+    rows.sort((a, b) => {
+      const ka = katOrder[a.dataset.kategori] || 99;
+      const kb = katOrder[b.dataset.kategori] || 99;
+      return dir === 'asc' ? ka - kb : kb - ka;
+    });
+    rows.forEach(r => tbody.appendChild(r));
+  }
+
+  thKategori && thKategori.addEventListener('click', () => {
+    if (kategoriSortDir === null || kategoriSortDir === 'desc') {
+      kategoriSortDir = 'asc';
+      sortKatIcon.className = 'bi bi-chevron-up ms-1';
+      sortKatIcon.style.opacity = '1';
+      sortKatIcon.style.color = 'var(--amber)';
+    } else {
+      kategoriSortDir = 'desc';
+      sortKatIcon.className = 'bi bi-chevron-down ms-1';
+      sortKatIcon.style.opacity = '1';
+      sortKatIcon.style.color = 'var(--amber)';
+    }
+    sortByKategori(kategoriSortDir);
+    applyFilter(currentFilter); // re-apply active filter after sort
+  });
+
+  // Sort toggle: by nominal
+  const sortToggle = document.getElementById('sortToggle');
+  let nominalSortDir = null;
+  sortToggle && sortToggle.addEventListener('click', () => {
+    if (nominalSortDir === null || nominalSortDir === 'desc') {
+      nominalSortDir = 'asc';
+      sortToggle.innerHTML = '<i class="bi bi-sort-numeric-up me-1"></i>Nominal &uarr;';
+      sortToggle.classList.add('active');
+    } else {
+      nominalSortDir = 'desc';
+      sortToggle.innerHTML = '<i class="bi bi-sort-numeric-down me-1"></i>Nominal &darr;';
+    }
+    const rows = getAllRows();
+    rows.sort((a, b) => {
+      const na = parseInt(a.dataset.nominal);
+      const nb = parseInt(b.dataset.nominal);
+      return nominalSortDir === 'asc' ? na - nb : nb - na;
+    });
+    rows.forEach(r => tbody.appendChild(r));
+    applyFilter(currentFilter);
+  });
+
+  // Init count display
+  updateFilterCount();
+</script>
+{% endblock %}

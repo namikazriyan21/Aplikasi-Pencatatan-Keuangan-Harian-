@@ -1,0 +1,21 @@
+# Lingkungan Virtual Python
+.venv/
+venv/
+ENV/
+env/
+
+# Python Cache & Hasil Kompilasi
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Laporan Bulanan (Hasil Export CSV)
+reports/*.csv
+
+# Konfigurasi Lingkungan (Berisi Kredensial Sensitif)
+.env
+
+# Database Lokal (Jika menggunakan SQLite/PostgreSQL lokal)
+*.db
+*.sqlite3

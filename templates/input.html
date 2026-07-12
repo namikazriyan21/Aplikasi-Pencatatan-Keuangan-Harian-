@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}Catat Transaksi — Kasir Warung{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header">
+  <h2>Catat Transaksi</h2>
+  <p>Isi formulir di bawah untuk mencatat pemasukan atau pengeluaran warung.</p>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-7 col-xl-6">
+
+    <!-- Alert -->
+    {% if pesan %}
+    <div class="alert-custom mb-4
+      {% if pesan.status == 'success' %}alert-success-custom{% else %}alert-error-custom{% endif %}">
+      <i class="bi {% if pesan.status == 'success' %}bi-check-circle-fill{% else %}bi-exclamation-circle-fill{% endif %} fs-5"></i>
+      {{ pesan.text }}
+    </div>
+    {% endif %}
+
+    <!-- Form Card -->
+    <div class="card p-4 p-md-5">
+
+      <!-- Card Header -->
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <div style="width:46px;height:46px;border-radius:12px;background:var(--warm-100);
+                    display:flex;align-items:center;justify-content:center;font-size:1.4rem;">
+          📝
+        </div>
+        <div>
+          <h5 class="mb-0" style="font-size:1.1rem;">Form Input Transaksi</h5>
+          <small class="text-muted">Semua kolom wajib diisi</small>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <form method="POST" action="{{ url_for('input_transaksi') }}" id="formTransaksi">
+
+        <!-- Tipe Transaksi -->
+        <div class="mb-4">
+          <label class="form-label">Tipe Transaksi</label>
+          <div class="tipe-toggle">
+            <input type="radio" name="tipe" id="tipeMasuk" value="Masuk" checked>
+            <label for="tipeMasuk">
+              <i class="bi bi-arrow-down-circle me-2"></i>Pemasukan
+            </label>
+            <input type="radio" name="tipe" id="tipeKeluar" value="Keluar">
+            <label for="tipeKeluar">
+              <i class="bi bi-arrow-up-circle me-2"></i>Pengeluaran
+            </label>
+          </div>
+        </div>
+
+        <!-- Tanggal -->
+        <div class="mb-3">
+          <label for="tanggal" class="form-label">Tanggal</label>
+          <input type="date" class="form-control" id="tanggal" name="tanggal"
+                 value="{{ today }}" required>
+        </div>
+
+        <!-- Kategori -->
+        <div class="mb-3">
+          <label for="kategori" class="form-label">Kategori</label>
+          <select class="form-select" id="kategori" name="kategori" required>
+            <!-- Options populated via JS -->
+          </select>
+        </div>
+
+        <!-- Nama Barang -->
+        <div class="mb-3">
+          <label for="nama_barang" class="form-label">Nama / Keterangan</label>
+          <input type="text" class="form-control" id="nama_barang" name="nama_barang"
+                 placeholder="Contoh: Penjualan Nasi Goreng, Beli Beras 10kg…"
+                 maxlength="100" required>
+          <div class="form-text" style="font-size:.75rem; color:var(--text-muted);">
+            Maksimal 100 karakter
+          </div>
+        </div>
+
+        <!-- Nominal -->
+        <div class="mb-4">
+          <label for="nominal_display" class="form-label">Nominal (Rp)</label>
+          <div style="position:relative;">
+            <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%);
+                         font-weight:600; color:var(--text-muted); pointer-events:none;">Rp</span>
+            <input type="text" class="form-control" id="nominal_display"
+                   placeholder="0" inputmode="numeric"
+                   style="padding-left:40px; font-weight:600; font-size:1rem;"
+                   required>
+            <input type="hidden" name="nominal" id="nominal_hidden">
+          </div>
+          <div class="form-text" style="font-size:.75rem; color:var(--text-muted);">
+            Masukkan angka tanpa titik atau koma
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Buttons -->
+        <div class="d-flex gap-3 pt-2">
+          <button type="submit" class="btn-primary-custom flex-fill text-center">
+            <i class="bi bi-save me-2"></i>Simpan Transaksi
+          </button>
+          <a href="{{ url_for('dashboard') }}" class="btn-outline-custom text-center" style="flex:0 0 auto;">
+            <i class="bi bi-x-lg me-1"></i>Batal
+          </a>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Quick Tips -->
+    <div class="card mt-3 p-3" style="background:var(--warm-50);">
+      <div style="font-size:.8rem; color:var(--text-muted);">
+        <strong style="color:var(--brown-600);">💡 Panduan Kategori</strong>
+        <ul class="mt-2 mb-0" style="padding-left:1.2rem; line-height:1.9;">
+          <li><strong>Harian Penjualan</strong> — Pendapatan dari hasil penjualan menu warung</li>
+          <li><strong>Harian (Pembelian)</strong> — Pengeluaran kecil harian di luar stok utama</li>
+          <li><strong>Stok Bahan</strong> — Belanja bahan baku masakan (beras, ayam, sayur, dll.)</li>
+          <li><strong>Operasional</strong> — Tagihan rutin (listrik, gas LPG, air, gaji pegawai)</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  /* ── Format nominal with thousand separator ── */
+  const displayInput = document.getElementById('nominal_display');
+  const hiddenInput  = document.getElementById('nominal_hidden');
+
+  displayInput.addEventListener('input', function () {
+    let raw = this.value.replace(/\D/g, '');
+    hiddenInput.value = raw;
+    if (raw) {
+      this.value = parseInt(raw, 10).toLocaleString('id-ID');
+    }
+  });
+
+  /* ── Dynamic Category ── */
+  const tipeMasuk = document.getElementById('tipeMasuk');
+  const tipeKeluar = document.getElementById('tipeKeluar');
+  const kategori = document.getElementById('kategori');
+
+  const optMasuk = `
+    <option value="Harian Penjualan" selected>📈 &nbsp;Harian Penjualan</option>
+  `;
+  const optKeluar = `
+    <option value="" disabled selected>— Pilih Kategori —</option>
+    <option value="Harian">🍽️ &nbsp;Harian (Pembelian Harian)</option>
+    <option value="Stok Bahan">🛒 &nbsp;Stok Bahan (Bahan Baku Masakan)</option>
+    <option value="Operasional">⚙️ &nbsp;Operasional (Listrik, Gas, dll.)</option>
+  `;
+
+  function updateKategori() {
+    if (tipeMasuk.checked) {
+      kategori.innerHTML = optMasuk;
+    } else {
+      kategori.innerHTML = optKeluar;
+    }
+  }
+
+  tipeMasuk.addEventListener('change', updateKategori);
+  tipeKeluar.addEventListener('change', updateKategori);
+  updateKategori();
+
+  /* ── Set hidden before submit ── */
+  document.getElementById('formTransaksi').addEventListener('submit', function () {
+    let raw = displayInput.value.replace(/\D/g, '');
+    hiddenInput.value = raw || '0';
+  });
+
+  /* ── Auto-scroll to alert on success ── */
+  {% if pesan and pesan.status == 'success' %}
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Reset form after success
+    setTimeout(() => {
+      document.getElementById('nama_barang').value = '';
+      document.getElementById('nominal_display').value = '';
+      document.getElementById('nominal_hidden').value = '';
+    }, 100);
+  {% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Cetak Laporan — Kasir Warung{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Cetak Laporan</h2>
+  <p>Pilih rentang waktu untuk mengunduh laporan transaksi dalam format CSV.</p>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card p-4 p-md-5 text-center">
+      <div style="width:64px;height:64px;border-radius:16px;background:var(--amber-lt); color:#fff;
+                  display:flex;align-items:center;justify-content:center;font-size:2rem; margin: 0 auto 24px;
+                  box-shadow: 0 4px 15px rgba(224,123,42,.3);">
+        <i class="bi bi-printer"></i>
+      </div>
+      <h4 class="mb-2" style="font-family:'Fraunces',serif; font-weight:700;">Unduh Laporan CSV</h4>
+      <p class="text-muted mb-4" style="font-size: .95rem; line-height: 1.6;">Laporan akan mencakup semua transaksi
+        pemasukan dan pengeluaran berdasarkan pilihan rentang waktu di bawah ini.</p>
+
+      <div class="d-flex flex-column gap-3 mt-2">
+        <a href="{{ url_for('export_csv', range=1) }}" class="btn-primary-custom text-decoration-none py-3"
+          style="font-size: 1.05rem;">
+          <i class="bi bi-file-earmark-spreadsheet me-2"></i> Bulan Ini
+        </a>
+        <a href="{{ url_for('export_csv', range=2) }}" class="btn-primary-custom text-decoration-none py-3"
+          style="background:var(--brown-600); border-color:var(--brown-600); font-size: 1.05rem;">
+          <i class="bi bi-file-earmark-spreadsheet me-2"></i> 2 Bulan Terakhir
+        </a>
+        <a href="{{ url_for('export_csv', range=3) }}" class="btn-primary-custom text-decoration-none py-3"
+          style="background:var(--brown-800); border-color:var(--brown-800); font-size: 1.05rem;">
+          <i class="bi bi-file-earmark-spreadsheet me-2"></i> 3 Bulan Terakhir
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
