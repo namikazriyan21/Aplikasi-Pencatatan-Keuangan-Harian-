@@ -37,6 +37,7 @@
       --shadow-sm: 0 2px 8px rgba(74,46,18,.08);
       --shadow-md: 0 4px 20px rgba(74,46,18,.12);
       --radius:   14px;
+      --sidebar-w: 240px;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -56,14 +57,15 @@
     .sidebar {
       position: fixed;
       top: 0; left: 0;
-      width: 240px;
+      width: var(--sidebar-w);
       height: 100vh;
       background: var(--brown-800);
       display: flex;
       flex-direction: column;
       padding: 0;
-      z-index: 1000;
+      z-index: 1040;
       box-shadow: 3px 0 20px rgba(0,0,0,.15);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
     }
 
     .sidebar-brand {
@@ -140,9 +142,49 @@
       font-size: .7rem;
     }
 
+    /* ── Backdrop overlay (mobile) ── */
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 1030;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    .sidebar-backdrop.show {
+      display: block;
+      opacity: 1;
+    }
+
+    /* ── Hamburger button (mobile only) ── */
+    .hamburger-btn {
+      display: none; /* hidden on desktop */
+      position: fixed;
+      top: 16px; left: 16px;
+      z-index: 1050;
+      width: 44px; height: 44px;
+      border: none;
+      border-radius: 10px;
+      background: var(--brown-800);
+      color: #fff;
+      font-size: 1.4rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,.2);
+      transition: background .2s, transform .2s;
+    }
+    .hamburger-btn:hover {
+      background: var(--brown-600);
+    }
+    .hamburger-btn:active {
+      transform: scale(.93);
+    }
+
     /* ── Main content ── */
     .main-wrapper {
-      margin-left: 240px;
+      margin-left: var(--sidebar-w);
       min-height: 100vh;
       padding: 32px 36px;
     }
@@ -343,12 +385,32 @@
     .alert-success-custom { background: var(--green-lt); color: var(--green); }
     .alert-error-custom   { background: var(--red-lt);   color: var(--red); }
 
-    /* ── Mobile Responsive (Strictly Isolated) ── */
+    /* ══════════════════════════════════════════════════════════════════
+       MOBILE RESPONSIVE — Off-canvas sidebar
+       ══════════════════════════════════════════════════════════════════ */
     @media screen and (max-width: 768px) {
-      /* Sidebar & Wrapper */
-      .sidebar { width: 100% !important; height: auto !important; position: relative !important; flex-direction: row !important; flex-wrap: wrap !important; }
-      .main-wrapper { margin-left: 0 !important; padding: 20px 16px !important; }
-      
+
+      /* Show hamburger button on mobile */
+      .hamburger-btn {
+        display: flex;
+      }
+
+      /* Sidebar: hidden off-screen by default, slides in */
+      .sidebar {
+        width: 75%;
+        max-width: 300px;
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      /* Main wrapper: full width, with top padding for hamburger */
+      .main-wrapper {
+        margin-left: 0 !important;
+        padding: 72px 16px 20px !important;
+      }
+
       /* Stack summary cards vertically */
       .row > .col-sm-6 { width: 100% !important; margin-bottom: 15px; }
 
@@ -411,8 +473,16 @@
 </head>
 <body>
 
+  <!-- Hamburger Button (Mobile Only) -->
+  <button class="hamburger-btn" id="hamburgerBtn" aria-label="Buka menu navigasi">
+    <i class="bi bi-list"></i>
+  </button>
+
+  <!-- Backdrop Overlay (Mobile Only) -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
   <!-- Sidebar -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="brand-icon">🍽️</div>
       <h5>Kasir Warung</h5>
@@ -483,6 +553,54 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Sidebar Toggle Script -->
+  <script>
+    (function() {
+      const sidebar  = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      const btn      = document.getElementById('hamburgerBtn');
+
+      function openSidebar() {
+        sidebar.classList.add('open');
+        backdrop.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+
+      btn.addEventListener('click', function() {
+        if (sidebar.classList.contains('open')) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      });
+
+      backdrop.addEventListener('click', closeSidebar);
+
+      // Close sidebar when a nav link is clicked (mobile)
+      sidebar.querySelectorAll('.nav-link').forEach(function(link) {
+        link.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            closeSidebar();
+          }
+        });
+      });
+
+      // Auto-close sidebar if window is resized to desktop
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+          closeSidebar();
+        }
+      });
+    })();
+  </script>
+
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>
