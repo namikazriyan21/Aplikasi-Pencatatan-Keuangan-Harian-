@@ -19,6 +19,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
+# Pastikan tabel dan data awal dibuat saat aplikasi dijalankan oleh Gunicorn
+with app.app_context():
+    db.create_all()
+    seed_data()
+
 # ── Daftarkan semua route ─────────────────────────────────────────────────────
 app.add_url_rule('/login',          'login',           login,           methods=['GET','POST'])
 app.add_url_rule('/logout',         'logout',          logout,          methods=['POST'])
@@ -28,9 +33,6 @@ app.add_url_rule('/hapus/<int:id>', 'hapus_transaksi', hapus_transaksi, methods=
 app.add_url_rule('/export-csv',     'export_csv',      export_csv)
 app.add_url_rule('/cetak_laporan',  'cetak_laporan',   cetak_laporan)
 
-# ── Jalankan aplikasi ─────────────────────────────────────────────────────────
+# ── Jalankan aplikasi (Hanya untuk lokal) ─────────────────────────────────────
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        seed_data()
     app.run(debug=True, port=5000)
