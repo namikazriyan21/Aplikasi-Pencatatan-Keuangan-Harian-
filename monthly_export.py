@@ -2,8 +2,6 @@ import os
 import csv
 import calendar
 import argparse
-import threading
-import time
 from datetime import date, timedelta
 from database import db, Transaksi
 
@@ -48,46 +46,7 @@ def export_monthly_report(year: int, month: int):
         print(f"[Exporter] Error generating report for {year}-{month:02d}: {e}")
         raise e
 
-def check_and_generate_previous_month():
-    """Checks if report for previous month exists, if not generates it."""
-    today = date.today()
-    # First day of this month minus 1 day is last day of previous month
-    first_of_this_month = today.replace(day=1)
-    last_day_of_prev_month = first_of_this_month - timedelta(days=1)
-    
-    prev_month = last_day_of_prev_month.month
-    prev_year = last_day_of_prev_month.year
-    
-    os.makedirs(REPORTS_DIR, exist_ok=True)
-    csv_filename = f"laporan_bulanan_{prev_year:04d}_{prev_month:02d}.csv"
-    csv_path = os.path.join(REPORTS_DIR, csv_filename)
-    
-    if not os.path.exists(csv_path):
-        print(f"[Scheduler] Laporan bulanan {prev_year:04d}_{prev_month:02d}.csv tidak ditemukan. Membuat laporan otomatis...")
-        export_monthly_report(prev_year, prev_month)
-    else:
-        print(f"[Scheduler] Laporan bulanan untuk {prev_year:04d}_{prev_month:02d} sudah tersedia.")
 
-def run_scheduler_loop(app):
-    """Background task loop that checks monthly reports."""
-    # Wait a few seconds to let Flask main threads start up properly
-    time.sleep(5)
-    while True:
-        try:
-            with app.app_context():
-                check_and_generate_previous_month()
-        except Exception as e:
-            print(f"[Scheduler] Error in scheduler loop: {e}")
-        # Sleep for 12 hours (43200 seconds) before checking again
-        time.sleep(12 * 3600)
-
-def start_scheduler(app):
-    """Starts the background scheduler thread."""
-    # Prevent duplicate thread launch in Flask debug reloader
-    if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-        t = threading.Thread(target=run_scheduler_loop, args=(app,), daemon=True)
-        t.start()
-        print("[Scheduler] Monthly report scheduler thread started.")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Ekspor Laporan Transaksi Bulanan Kasir Warung ke CSV")

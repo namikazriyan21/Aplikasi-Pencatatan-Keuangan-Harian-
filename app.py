@@ -28,11 +28,9 @@ app.add_url_rule('/hapus/<int:id>', 'hapus_transaksi', hapus_transaksi, methods=
 app.add_url_rule('/export-csv',     'export_csv',      export_csv)
 app.add_url_rule('/cetak_laporan',  'cetak_laporan',   cetak_laporan)
 
-# ── Jalankan aplikasi (dengan scheduler) ──────────────────────────────────────
+# ── Jalankan aplikasi ─────────────────────────────────────────────────────────
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         seed_data()
-    from monthly_export import start_scheduler
-    start_scheduler(app)
-    app.run(debug=False, port=5000)
+    app.run(debug=True, port=5000)

@@ -33,7 +33,6 @@ def login():
             session.clear()
             session['user_id']  = user.id
             session['username'] = user.username
-            session.permanent   = True
             safe_next = (next_url
                          if next_url and next_url.startswith('/')
                          else url_for('dashboard'))
