@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,28 +8,36 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
     :root {
-      --cream:      #FAF6F0;
-      --warm-50:    #FDF8F2;
-      --warm-100:   #F5EAD8;
-      --warm-200:   #E8D5B7;
-      --brown-600:  #7C5230;
-      --brown-800:  #4A2E12;
-      --amber:      #E07B2A;
-      --green:      #2E7D5A;
-      --green-lt:   #E6F4EE;
-      --red:        #C0392B;
-      --red-lt:     #FDECEA;
-      --text-main:  #2C1A0E;
+      --cream: #FAF6F0;
+      --warm-50: #FDF8F2;
+      --warm-100: #F5EAD8;
+      --warm-200: #E8D5B7;
+      --brown-600: #7C5230;
+      --brown-800: #4A2E12;
+      --amber: #E07B2A;
+      --green: #2E7D5A;
+      --green-lt: #E6F4EE;
+      --red: #C0392B;
+      --red-lt: #FDECEA;
+      --text-main: #2C1A0E;
       --text-muted: #8A7060;
-      --border:     #E0D0BC;
+      --border: #E0D0BC;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: 'DM Sans', sans-serif;
@@ -41,46 +50,44 @@
     /* ── Left panel (decorative) ── */
     .left-panel {
       flex: 0 0 420px;
-      background: var(--brown-800);
+      background: linear-gradient(rgba(74, 46, 18, 0.78), rgba(44, 26, 14, 0.88)),
+      url("{{ url_for('static', filename='img/login-bg.jpg') }}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: center;
       padding: 48px 44px;
       position: relative;
       overflow: hidden;
     }
 
-    /* Decorative circles */
-    .left-panel::before,
-    .left-panel::after {
-      content: '';
-      position: absolute;
-      border-radius: 50%;
-      opacity: .06;
-      background: #fff;
-    }
-    .left-panel::before {
-      width: 360px; height: 360px;
-      bottom: -80px; right: -100px;
-    }
-    .left-panel::after {
-      width: 200px; height: 200px;
-      top: -50px; left: -60px;
-    }
 
     .left-brand {
       position: relative;
       z-index: 1;
     }
+
     .left-brand .brand-icon {
-      width: 52px; height: 52px;
-      background: var(--amber);
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.6rem;
+      width: 160px;
+      height: 90px;
+      background: #fff;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin-bottom: 20px;
-      box-shadow: 0 8px 24px rgba(224,123,42,.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+      padding: 8px 12px;
     }
+
+    .left-brand .brand-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
     .left-brand h1 {
       font-family: 'Fraunces', serif;
       font-size: 2rem;
@@ -89,6 +96,7 @@
       line-height: 1.15;
       margin-bottom: 12px;
     }
+
     .left-brand p {
       color: var(--warm-200);
       font-size: .9rem;
@@ -100,28 +108,38 @@
       position: relative;
       z-index: 1;
     }
+
     .feature-item {
       display: flex;
       align-items: flex-start;
       gap: 14px;
       margin-bottom: 18px;
     }
-    .feature-item:last-child { margin-bottom: 0; }
+
+    .feature-item:last-child {
+      margin-bottom: 0;
+    }
+
     .feature-icon {
-      width: 34px; height: 34px;
-      background: rgba(255,255,255,.1);
+      width: 34px;
+      height: 34px;
+      background: rgba(255, 255, 255, .1);
       border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: .95rem;
       flex-shrink: 0;
       margin-top: 2px;
     }
+
     .feature-text strong {
       display: block;
       color: #fff;
       font-size: .88rem;
       margin-bottom: 2px;
     }
+
     .feature-text span {
       color: var(--warm-200);
       font-size: .78rem;
@@ -132,6 +150,7 @@
       position: relative;
       z-index: 1;
     }
+
     .left-footer small {
       color: var(--warm-200);
       font-size: .72rem;
@@ -159,6 +178,7 @@
       color: var(--brown-800);
       margin-bottom: 6px;
     }
+
     .login-box .subtitle {
       color: var(--text-muted);
       font-size: .88rem;
@@ -176,11 +196,24 @@
       font-weight: 500;
       margin-bottom: 20px;
     }
-    .flash-warning { background: #FFF8E6; color: #92610A; border: 1px solid #F5D87E; }
-    .flash-error   { background: var(--red-lt); color: var(--red); border: 1px solid #F5C6C2; }
+
+    .flash-warning {
+      background: #FFF8E6;
+      color: #92610A;
+      border: 1px solid #F5D87E;
+    }
+
+    .flash-error {
+      background: var(--red-lt);
+      color: var(--red);
+      border: 1px solid #F5C6C2;
+    }
 
     /* Form elements */
-    .form-group { margin-bottom: 18px; }
+    .form-group {
+      margin-bottom: 18px;
+    }
+
     .form-label {
       display: block;
       font-weight: 600;
@@ -188,9 +221,11 @@
       color: var(--brown-800);
       margin-bottom: 7px;
     }
+
     .input-wrap {
       position: relative;
     }
+
     .input-icon {
       position: absolute;
       left: 14px;
@@ -200,6 +235,7 @@
       font-size: 1rem;
       pointer-events: none;
     }
+
     .form-input {
       width: 100%;
       padding: 11px 14px 11px 40px;
@@ -212,14 +248,16 @@
       transition: border-color .2s, box-shadow .2s, background .2s;
       outline: none;
     }
+
     .form-input:focus {
       border-color: var(--amber);
-      box-shadow: 0 0 0 3px rgba(224,123,42,.14);
+      box-shadow: 0 0 0 3px rgba(224, 123, 42, .14);
       background: #fff;
     }
+
     .form-input.input-error {
       border-color: var(--red);
-      box-shadow: 0 0 0 3px rgba(192,57,43,.1);
+      box-shadow: 0 0 0 3px rgba(192, 57, 43, .1);
     }
 
     /* Password toggle */
@@ -237,7 +275,10 @@
       font-size: .95rem;
       transition: color .15s;
     }
-    .toggle-pw:hover { color: var(--amber); }
+
+    .toggle-pw:hover {
+      color: var(--amber);
+    }
 
     /* Submit button */
     .btn-login {
@@ -258,43 +299,40 @@
       gap: 8px;
       margin-top: 8px;
     }
+
     .btn-login:hover {
       background: var(--brown-600);
       transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(224,123,42,.3);
+      box-shadow: 0 6px 18px rgba(224, 123, 42, .3);
     }
-    .btn-login:active { transform: translateY(0); }
 
-    /* Hint box */
-    .hint-box {
-      margin-top: 24px;
-      padding: 14px 16px;
-      background: var(--warm-100);
-      border-radius: 10px;
-      border-left: 3px solid var(--amber);
+    .btn-login:active {
+      transform: translateY(0);
     }
-    .hint-box p {
-      font-size: .78rem;
-      color: var(--brown-600);
-      margin: 0;
-      line-height: 1.6;
-    }
-    .hint-box strong { color: var(--brown-800); }
+
 
     /* Responsive: hide left panel on small screens */
     @media (max-width: 720px) {
-      .left-panel { display: none; }
-      .right-panel { padding: 32px 20px; }
+      .left-panel {
+        display: none;
+      }
+
+      .right-panel {
+        padding: 32px 20px;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <!-- Left decorative panel -->
   <div class="left-panel">
     <div class="left-brand">
-      <div class="brand-icon">🍽️</div>
-      <h1>Kasir<br>Warung</h1>
+      <div class="brand-icon">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Warteg Plamboyan Bahari">
+      </div>
+      <h1>Kasir Warung</h1>
       <p>Sistem pencatatan keuangan harian warung makan yang sederhana, cepat, dan aman.</p>
     </div>
 
@@ -310,12 +348,12 @@
 
       <!-- Flash warning (redirect dari halaman protected) -->
       {% with msgs = get_flashed_messages(with_categories=true) %}
-        {% for cat, msg in msgs %}
-          <div class="flash-msg flash-{{ cat }}">
-            <i class="bi bi-exclamation-circle-fill"></i>
-            {{ msg }}
-          </div>
-        {% endfor %}
+      {% for cat, msg in msgs %}
+      <div class="flash-msg flash-{{ cat }}">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        {{ msg }}
+      </div>
+      {% endfor %}
       {% endwith %}
 
       <!-- Error login -->
@@ -334,17 +372,9 @@
           <label class="form-label" for="username">Username</label>
           <div class="input-wrap">
             <i class="bi bi-person input-icon"></i>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              class="form-input {% if error %}input-error{% endif %}"
-              placeholder="Masukkan username"
-              value="{{ request.form.get('username', '') }}"
-              autocomplete="username"
-              required
-              autofocus
-            >
+            <input type="text" id="username" name="username" class="form-input {% if error %}input-error{% endif %}"
+              placeholder="Masukkan username" value="{{ request.form.get('username', '') }}" autocomplete="username"
+              required autofocus>
           </div>
         </div>
 
@@ -353,15 +383,8 @@
           <label class="form-label" for="password">Password</label>
           <div class="input-wrap">
             <i class="bi bi-lock input-icon"></i>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              class="form-input {% if error %}input-error{% endif %}"
-              placeholder="Masukkan password"
-              autocomplete="current-password"
-              required
-            >
+            <input type="password" id="password" name="password" class="form-input {% if error %}input-error{% endif %}"
+              placeholder="Masukkan password" autocomplete="current-password" required>
             <button type="button" class="toggle-pw" id="togglePw" title="Tampilkan password">
               <i class="bi bi-eye" id="eyeIcon"></i>
             </button>
@@ -374,27 +397,19 @@
         </button>
       </form>
 
-      <!-- Default credential hint -->
-      <div class="hint-box">
-        <p>
-          <strong>Akun default:</strong><br>
-          Username: <strong>admin</strong> &nbsp;·&nbsp; Password: <strong>admin123</strong><br>
-          <span style="opacity:.7;">Ganti password setelah login pertama.</span>
-        </p>
-      </div>
 
     </div>
   </div>
 
   <script>
     // Toggle show/hide password
-    const pwInput  = document.getElementById('password');
+    const pwInput = document.getElementById('password');
     const toggleBtn = document.getElementById('togglePw');
-    const eyeIcon  = document.getElementById('eyeIcon');
+    const eyeIcon = document.getElementById('eyeIcon');
 
     toggleBtn.addEventListener('click', () => {
       const show = pwInput.type === 'password';
-      pwInput.type      = show ? 'text' : 'password';
+      pwInput.type = show ? 'text' : 'password';
       eyeIcon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
     });
 
@@ -410,4 +425,5 @@
   </script>
 
 </body>
+
 </html>
