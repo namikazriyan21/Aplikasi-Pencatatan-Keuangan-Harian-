@@ -3,7 +3,7 @@ import csv
 import calendar
 import argparse
 from datetime import date, timedelta
-from database import db, Transaksi
+from database import db, Transaksi, get_today
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPORTS_DIR = os.path.join(BASE_DIR, 'reports')
@@ -66,7 +66,7 @@ if __name__ == '__main__':
             export_monthly_report(args.year, args.month)
         else:
             # Default to previous month
-            today = date.today()
+            today = get_today()
             first_of_this_month = today.replace(day=1)
             last_day_of_prev_month = first_of_this_month - timedelta(days=1)
             prev_month = last_day_of_prev_month.month

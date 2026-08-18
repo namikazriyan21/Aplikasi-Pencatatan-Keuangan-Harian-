@@ -2,7 +2,7 @@ import csv
 import io
 from flask import render_template, request, redirect, url_for, Response, session
 from datetime import date, timedelta
-from database import db, Transaksi
+from database import db, Transaksi, get_today
 from auth import login_required
 from sqlalchemy import func
 
@@ -24,7 +24,7 @@ def _fmt_tanggal(d: date) -> str:
 
 @login_required
 def dashboard():
-    today = date.today()
+    today = get_today()
     user_id = session.get('user_id')
 
     # Statistik hari ini
@@ -102,7 +102,7 @@ def input_transaksi():
         except Exception:
             pesan = {'status': 'error', 'text': 'Data tidak valid. Periksa kembali semua isian Anda.'}
 
-    return render_template('input.html', today=date.today().isoformat(), pesan=pesan)
+    return render_template('input.html', today=get_today().isoformat(), pesan=pesan)
 
 
 # ── Hapus Transaksi ───────────────────────────────────────────────────────────
@@ -121,7 +121,7 @@ def hapus_transaksi(id):
 
 @login_required
 def cetak_laporan():
-    return render_template('cetak_laporan.html', today=date.today().isoformat())
+    return render_template('cetak_laporan.html', today=get_today().isoformat())
 
 
 # ── Ekspor Transaksi ke CSV ───────────────────────────────────────────────────
@@ -129,7 +129,7 @@ def cetak_laporan():
 @login_required
 def export_csv():
     try:
-        today = date.today()
+        today = get_today()
         user_id = session.get('user_id')
         range_val = request.args.get('range')
         start_date = None

@@ -13,16 +13,21 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, template_folder=os.path.join(BASE_DIR, 'templates'))
 app.secret_key = os.getenv('SECRET_KEY', secrets.token_hex(32))
 
-# ── Konfigurasi Database ──────────────────────────────────────────────────────
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/warung_db')
+db_url = os.getenv('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/warung_db')
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
 # Pastikan tabel dan data awal dibuat saat aplikasi dijalankan oleh Gunicorn
 with app.app_context():
-    db.create_all()
-    seed_data()
+    try:
+        db.create_all()
+        seed_data()
+    except Exception as e:
+        print(f"Warning: Database initialization error: {e}")
 
 # ── Daftarkan semua route ─────────────────────────────────────────────────────
 app.add_url_rule('/login',          'login',           login,           methods=['GET','POST'])

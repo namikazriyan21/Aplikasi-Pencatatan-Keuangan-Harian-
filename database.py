@@ -1,10 +1,15 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 import hashlib
 import secrets
 import os
 
 db = SQLAlchemy()
+
+WIB = timezone(timedelta(hours=7))
+
+def get_today() -> date:
+    return datetime.now(WIB).date()
 
 # ── Password (PBKDF2-SHA256, 260k iterasi) ────────────────────────────────────
 
@@ -28,7 +33,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(WIB))
 
 class Transaksi(db.Model):
     __tablename__ = 'transaksi'
@@ -46,29 +51,4 @@ def seed_data():
     if not User.query.first():
         admin = User(username='admin', password=hash_password('admin123'))
         db.session.add(admin)
-        db.session.commit()
-
-    if not Transaksi.query.first():
-        today = date.today()
-        admin = User.query.filter_by(username='admin').first()
-        admin_id = admin.id if admin else 1
-        samples = [
-            Transaksi(tanggal=today - timedelta(days=6), tipe='Masuk',  kategori='Harian Penjualan', nama_barang='Penjualan Nasi Goreng', nominal=350000, user_id=admin_id),
-            Transaksi(tanggal=today - timedelta(days=6), tipe='Keluar', kategori='Stok Bahan',       nama_barang='Beli Beras 10kg',       nominal=130000, user_id=admin_id),
-            Transaksi(tanggal=today - timedelta(days=5), tipe='Masuk',  kategori='Harian Penjualan', nama_barang='Penjualan Mie Ayam',    nominal=420000, user_id=admin_id),
-            Transaksi(tanggal=today - timedelta(days=5), tipe='Keluar', kategori='Operasional',      nama_barang='Bayar Listrik',         nominal=80000, user_id=admin_id),
-            Transaksi(tanggal=today - timedelta(days=4), tipe='Masuk',  kategori='Harian Penjualan', nama_barang='Penjualan Soto Ayam',   nominal=310000, user_id=admin_id),
-            Transaksi(tanggal=today - timedelta(days=4), tipe='Keluar', kategori='Stok Bahan',       nama_barang='Beli Ayam 5kg',         nominal=165000, user_id=admin_id),
-            Transaksi(tanggal=today - timedelta(days=3), tipe='Masuk',  kategori='Harian Penjualan', nama_barang='Penjualan Bakso',       nominal=480000, user_id=admin_id),
-            Transaksi(tanggal=today - timedelta(days=3), tipe='Keluar', kategori='Stok Bahan',       nama_barang='Beli Sayuran Segar',    nominal=55000, user_id=admin_id),
-            Transaksi(tanggal=today - timedelta(days=2), tipe='Masuk',  kategori='Harian Penjualan', nama_barang='Penjualan Nasi Gudeg',  nominal=390000, user_id=admin_id),
-            Transaksi(tanggal=today - timedelta(days=2), tipe='Keluar', kategori='Operasional',      nama_barang='Beli Gas LPG 3 Tabung', nominal=75000, user_id=admin_id),
-            Transaksi(tanggal=today - timedelta(days=1), tipe='Masuk',  kategori='Harian Penjualan', nama_barang='Penjualan Rawon',       nominal=445000, user_id=admin_id),
-            Transaksi(tanggal=today - timedelta(days=1), tipe='Keluar', kategori='Stok Bahan',       nama_barang='Beli Bumbu Dapur',      nominal=95000, user_id=admin_id),
-            Transaksi(tanggal=today,                     tipe='Masuk',  kategori='Harian Penjualan', nama_barang='Penjualan Pagi',        nominal=275000, user_id=admin_id),
-            Transaksi(tanggal=today,                     tipe='Masuk',  kategori='Harian Penjualan', nama_barang='Penjualan Siang',       nominal=310000, user_id=admin_id),
-            Transaksi(tanggal=today,                     tipe='Keluar', kategori='Stok Bahan',       nama_barang='Beli Tahu & Tempe',     nominal=45000, user_id=admin_id),
-            Transaksi(tanggal=today,                     tipe='Keluar', kategori='Operasional',      nama_barang='Bayar Air PDAM',        nominal=35000, user_id=admin_id),
-        ]
-        db.session.bulk_save_objects(samples)
         db.session.commit()
